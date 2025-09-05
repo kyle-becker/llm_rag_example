@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd 
 import numpy as np
 import boto3
-import yaml
 import json
 
 from langchain.embeddings import OpenAIEmbeddings
