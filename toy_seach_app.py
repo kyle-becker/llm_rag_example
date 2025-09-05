@@ -9,7 +9,25 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
 
-st.title('App to Search for Toys')
+st.title('Toy Shopping App')
+
+st.write("""This app was created as an example of how to use a ratrieval augmented generation (RAG) model to help customers answer questions related to a stores toy inventory. This app uses the 
+            retail toy dataset which can be found here https://github.com/GoogleCloudPlatform/python-docs-samples/blob/main/cloud-sql/postgres/pgvector/data/retail_toy_dataset.csv . 
+            The product description has been encoded into sentence embeddings using the OpenAIEMbeddings model and stored in a pinecone vector database. The user can ask any question
+            about the toy dataset and the model will find the most relevant chunks and inject this information into a prompt to the 2.7B parameter from meta 
+            (found here https://huggingface.co/meta-llama/Llama-2-7b) to provide an answer based on product descriptions price and model number""")
+
+
+# Download and save the dataset containing product information in a Pandas dataframe.
+DATASET_URL='https://github.com/GoogleCloudPlatform/python-docs-samples/raw/main/cloud-sql/postgres/pgvector/data/retail_toy_dataset.csv'
+df = pd.read_csv(DATASET_URL)
+
+#filter for specific columns
+df = df.loc[:, ['product_id', 'product_name', 'description', 'list_price']]
+
+st.write(df.head(5))
+
+st.write(""" An example of a prompt you can use is "I am looking for Bicycle Playing cards, what is the product_name and list_price" """)
 
 
 # load in environment variables 
@@ -93,8 +111,8 @@ def get_products_information(question, embeddings, vector_store, bedrock):
     
     return response_text
 
-question = st.text_input(label="input what type of toy you are looking for or what information you are looking to learn about a toy", 
-                             max_chars=100, key='question', type='default')
+question = st.text_input(label="Tell me what type of toy you are looking for and any information you would like to know about it", 
+                             max_chars=200, key='question', type='default')
     
 if st.button("Submit Question"):
     data_load_state = st.text('Getting response...')
