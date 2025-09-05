@@ -29,23 +29,19 @@ st.write(df.head(5))
 
 st.write(""" An example of a prompt you can use is "I am looking for Bicycle Playing cards, what is the product_name and list_price" """)
 
-
-# load in environment variables 
-with open('config.yaml') as info:
-  env = yaml.load(info, Loader=yaml.Loader)
-
 # connect to pinecone
-pc = Pinecone(api_key=env['pinecone_api_key'])
+pc = Pinecone(api_key=st.secrets['pinecone_api_key'])
 
 #connect to openai for document embeddings
-embeddings = OpenAIEmbeddings(api_key=env['open_ai_api_key'])
+embeddings = OpenAIEmbeddings(api_key=st.secrets['open_ai_api_key'])
 
 # set up vector store to upsert to index and then embedd the documents using openAI Embedding from above
 index = pc.Index('product-descriptions')
 vector_store = PineconeVectorStore(index=index, embedding=embeddings)
 
 # connect to  amazon bedrock
-bedrock = boto3.client(service_name="bedrock-runtime", region_name="us-east-1")
+bedrock = boto3.client(service_name="bedrock-runtime", region_name="us-east-1", aws_access_key_id=st.secrets['aws_access_key_id'],
+        aws_secret_access_key=st.secrets['aws_secret_access_key'])
 
 def get_products_information(question, embeddings, vector_store, bedrock):
 
