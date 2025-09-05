@@ -15,7 +15,9 @@ st.write("""This app was created as an example of how to use a ratrieval augment
             retail toy dataset which can be found here https://github.com/GoogleCloudPlatform/python-docs-samples/blob/main/cloud-sql/postgres/pgvector/data/retail_toy_dataset.csv . 
             The product description has been encoded into sentence embeddings using the OpenAIEMbeddings model and stored in a pinecone vector database. The user can ask any question
             about the toy dataset and the model will find the most relevant chunks and inject this information into a prompt to the 2.7B parameter from meta 
-            (found here https://huggingface.co/meta-llama/Llama-2-7b) to provide an answer based on product descriptions price and model number""")
+            (found here https://huggingface.co/meta-llama/Llama-2-7b) to provide an answer based on product descriptions price and model number.""")
+
+st.write("The code to create this app can be found here https://github.com/kyle-becker/llm_rag_example")
 
 
 # Download and save the dataset containing product information in a Pandas dataframe.
