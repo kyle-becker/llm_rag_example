@@ -6,7 +6,7 @@ import json
 
 from langchain.embeddings import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
-from pinecone import Pinecone
+from pinecone import Pinecone, ServerlessSpec
 
 st.title('Toy Shopping App')
 
