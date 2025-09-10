@@ -3,10 +3,11 @@ import pandas as pd
 import numpy as np
 import boto3
 import json
+import re
 
 from langchain.embeddings import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
-from pinecone import Pinecone, ServerlessSpec
+from pinecone import Pinecone
 
 st.title('Toy Shopping App')
 
@@ -26,7 +27,7 @@ df = pd.read_csv(DATASET_URL)
 #filter for specific columns
 df = df.loc[:, ['product_id', 'product_name', 'description', 'list_price']]
 
-st.write(df.head(5))
+st.write("""Some toy types that are contained within the dataset are games, swimming and beach toys.""")
 
 st.write(""" An example of a prompt you can use is "I am looking for Bicycle Playing cards, what is the product_name and list_price" """)
 
@@ -34,7 +35,7 @@ st.write(""" An example of a prompt you can use is "I am looking for Bicycle Pla
 pc = Pinecone(api_key=st.secrets['pinecone_api_key'])
 
 #connect to openai for document embeddings
-embeddings = OpenAIEmbeddings(api_key=st.secrets['open_ai_api_key'])
+embeddings = OpenAIEmbeddings(api_key=st.secrets['open_ai_api_test_key'])
 
 # set up vector store to upsert to index and then embedd the documents using openAI Embedding from above
 index = pc.Index('product-descriptions')
@@ -64,6 +65,9 @@ def get_products_information(question, embeddings, vector_store, bedrock):
     metadata = []
     for res in results:
         information.append(f"* {res.page_content + f" The price of the product is {res.metadata['list_price']}"} [{res.metadata}]")
+        information.append(f"* {res.page_content + f" The product id is {res.metadata['product_id']}"} [{res.metadata}]")
+        information.append(f"* {res.page_content + f" The product name is {res.metadata['product_name']}"} [{res.metadata}]")
+
         metadata.append(res.metadata)
 
     
@@ -115,4 +119,17 @@ if st.button("Submit Question"):
     data_load_state = st.text('Getting response...')
     results = get_products_information(question, embeddings, vector_store, bedrock)
     data_load_state.text("Done getting response")
-    st.write(results)
+    for result in re.split(re.split("/n|."), results):
+        st.write(f"/n {result}")
+    metadata = results.split('metadata:')[-1]
+    st.write("/n Here is the metadata associated with the results for inspection")
+    st.write(f"/n {metadata}")
+
+
+filtered_input = st.text_input(label="Filter the dataframe product description to see how well the llm did ?", 
+                             max_chars=50, key='filter', type='default')
+
+if st.button("Filter Dataframe"):
+    # Filter for records containing "Apple" in the 'Product' column
+    filtered_df = df[df['description'].str.contains(filtered_input, na=False)]
+    st.write(filtered_df)
