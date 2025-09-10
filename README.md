@@ -4,4 +4,10 @@ The product description has been encoded into sentence embeddings using the Open
 about the toy dataset and the model will find the most relevant chunks and inject this information into a prompt to the 2.7B parameter from meta 
 (found here https://huggingface.co/meta-llama/Llama-2-7b) to provide an answer based on product descriptions price and model number.
 
+Some toy types that are contained within the dataset are games, swimming and beach toys.
+
+The requirements.txt is for the application
+
+The jupyer_noteboook_requirments.txt file is for the jupyter notebook where the experimentation was done 
+
 An example of a prompt you can use is "I am looking for Bicycle Playing cards, what is the product_name and list_price"
