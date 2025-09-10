@@ -35,7 +35,7 @@ st.write(""" An example of a prompt you can use is "I am looking for Bicycle Pla
 pc = Pinecone(api_key=st.secrets['pinecone_api_key'])
 
 #connect to openai for document embeddings
-embeddings = OpenAIEmbeddings(api_key=st.secrets['open_ai_api_test_key'])
+embeddings = OpenAIEmbeddings(api_key=st.secrets['open_ai_api_key'])
 
 # set up vector store to upsert to index and then embedd the documents using openAI Embedding from above
 index = pc.Index('product-descriptions')
