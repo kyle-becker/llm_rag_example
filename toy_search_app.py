@@ -113,7 +113,7 @@ def get_products_information(question, embeddings, vector_store, bedrock):
     return response_text
 
 question = st.text_input(label="Tell me what type of toy you are looking for and any information you would like to know about it", 
-                             max_chars=200, key='question', type='default')
+                             max_chars=200, key='question', type='default', value="I am looking for Bicycle Playing cards, what is the product_name and list_price")
     
 if st.button("Submit Question"):
     data_load_state = st.text('Getting response...')
@@ -127,9 +127,11 @@ if st.button("Submit Question"):
 
 
 filtered_input = st.text_input(label="Filter the dataframe product description to see how well the llm did ?", 
-                             max_chars=50, key='filter', type='default')
+                             max_chars=50, key='filter', type='default', value="playing cards")
 
 if st.button("Filter Dataframe"):
+    data_filter = st.text('Filtering Data...')
     # Filter for records containing "Apple" in the 'Product' column
     filtered_df = df[df['description'].str.contains(filtered_input, na=False)]
+    data_filter.text("Done Filtering Dataframe")
     st.write(filtered_df)
