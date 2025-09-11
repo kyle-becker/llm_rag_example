@@ -64,9 +64,12 @@ def get_products_information(question, embeddings, vector_store, bedrock):
     information = []
     metadata = []
     for res in results:
-        information.append(f"* {res.page_content + f" The price of the product is {res.metadata['list_price']}"} [{res.metadata}]")
-        information.append(f"* {res.page_content + f" The product id is {res.metadata['product_id']}"} [{res.metadata}]")
-        information.append(f"* {res.page_content + f" The product name is {res.metadata['product_name']}"} [{res.metadata}]")
+        information.append(f"* {res.page_content + f""" 
+                                The price of the product is {res.metadata['list_price']} 
+                                the product id is {res.metadata['product_id']} 
+                                and the product name is {res.metadata['product_name']}"""} [{res.metadata}]")
+        # information.append(f"* {res.page_content + f" The product id is {res.metadata['product_id']}"} [{res.metadata}]")
+        # information.append(f"* {res.page_content + f" The product name is {res.metadata['product_name']}"} [{res.metadata}]")
 
         metadata.append(res.metadata)
 
@@ -119,9 +122,14 @@ if st.button("Submit Question"):
     data_load_state = st.text('Getting response...')
     results = get_products_information(question, embeddings, vector_store, bedrock)
     data_load_state.text("Done getting response")
-    for result in re.split(re.split("/n|."), results):
-        st.write(f"/n {result}")
+    # get metadata
     metadata = results.split('metadata:')[-1]
+    #remove metadata from results
+    results = results.split('metadata:', 1)[0]
+    # split results into sentences on next line
+    for result in re.split("(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s", results):
+        st.write(f"{result}")
+    
     st.write("/n Here is the metadata associated with the results for inspection")
     st.write(f"/n {metadata}")
 
