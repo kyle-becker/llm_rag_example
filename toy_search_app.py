@@ -117,8 +117,25 @@ def get_products_information(question, embeddings, vector_store, bedrock):
 
 question = st.text_input(label="Tell me what type of toy you are looking for and any information you would like to know about it", 
                              max_chars=200, key='question', type='default', value="I am looking for Bicycle Playing cards, what is the product_name and list_price")
+
+#set up logic to persist button click results
+if 'question_clicked' not in st.session_state:
+    st.session_state.question_clicked = False
+if 'filter_clicked' not in st.session_state:
+    st.session_state.filter_clicked = False
+
+
+def click_question_button():
+    st.session_state.question_clicked = True
+
+def click_filter_button():
+    st.session_state.filter_clicked = True
+
     
-if st.button("Submit Question"):
+st.button("Submit Question", on_click=click_question_button)
+    
+
+if st.session_state.question_clicked:
     data_load_state = st.text('Getting response...')
     results = get_products_information(question, embeddings, vector_store, bedrock)
     data_load_state.text("Done getting response")
@@ -137,7 +154,10 @@ if st.button("Submit Question"):
 filtered_input = st.text_input(label="Filter the dataframe product description to see how well the llm did ?", 
                              max_chars=50, key='filter', type='default', value="playing cards")
 
-if st.button("Filter Dataframe"):
+st.button("Filter Dataframe", on_click=click_filter_button)
+    
+
+if st.session_state.filter_clicked:
     data_filter = st.text('Filtering Data...')
     # Filter for records containing "Apple" in the 'Product' column
     filtered_df = df[df['description'].str.contains(filtered_input, na=False)]
