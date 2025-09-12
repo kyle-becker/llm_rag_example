@@ -9,9 +9,12 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from pinecone import Pinecone
 
+#variable to hold metadata product id if a question is submitted
+metadata_product_ids = []
+
 st.title('Toy Shopping App')
 
-st.write("""This app was created as an example of how to use a ratrieval augmented generation (RAG) model to help customers answer questions related to a stores toy inventory. This app uses the 
+st.write("""This app was created as an example of how to use a retrieval augmented generation (RAG) model to help customers answer questions related to a stores toy inventory. This app uses the 
             retail toy dataset which can be found here https://github.com/GoogleCloudPlatform/python-docs-samples/blob/main/cloud-sql/postgres/pgvector/data/retail_toy_dataset.csv . 
             The product description has been encoded into sentence embeddings using the OpenAIEMbeddings model and stored in a pinecone vector database. The user can ask any question
             about the toy dataset and the model will find the most relevant chunks and inject this information into a prompt to the 2.7B parameter from meta 
@@ -45,6 +48,13 @@ vector_store = PineconeVectorStore(index=index, embedding=embeddings)
 bedrock = boto3.client(service_name="bedrock-runtime", region_name="us-east-1", aws_access_key_id=st.secrets['aws_access_key_id'],
         aws_secret_access_key=st.secrets['aws_secret_access_key'])
 
+# function to highlight rows of filtered dataframe if product_id in metadata
+def highlight_rows(row):
+    if metadata_product_ids:
+        if row['product_id'] in metadata_product_ids:
+            return ['background-color: green'] * len(row)
+    return [''] * len(row)
+
 def get_products_information(question, embeddings, vector_store, bedrock):
 
     # create initial prompt template for llm
@@ -68,9 +78,8 @@ def get_products_information(question, embeddings, vector_store, bedrock):
                                 The price of the product is {res.metadata['list_price']} 
                                 the product id is {res.metadata['product_id']} 
                                 and the product name is {res.metadata['product_name']}"""} [{res.metadata}]")
-        # information.append(f"* {res.page_content + f" The product id is {res.metadata['product_id']}"} [{res.metadata}]")
-        # information.append(f"* {res.page_content + f" The product name is {res.metadata['product_name']}"} [{res.metadata}]")
-
+        #store metadata product ids for highlighting in filter
+        metadata_product_ids.append(res.metadata['product_id'])
         metadata.append(res.metadata)
 
     
@@ -151,7 +160,8 @@ if st.session_state.question_clicked:
     st.write(f"{metadata}")
 
 
-filtered_input = st.text_input(label="Filter the dataframe product description to see how well the llm did ?", 
+filtered_input = st.text_input(label="""Filter the dataframe product description to see how well 
+                               the llm did, results that match the metadata will be highlighted""", 
                              max_chars=50, key='filter', type='default', value="playing cards")
 
 st.button("Filter Dataframe", on_click=click_filter_button)
@@ -162,4 +172,10 @@ if st.session_state.filter_clicked:
     # Filter for records containing "Apple" in the 'Product' column
     filtered_df = df[df['description'].str.contains(filtered_input, na=False)]
     data_filter.text("Done Filtering Dataframe")
-    st.write(filtered_df)
+
+    # Apply the styling function to the DataFrame
+    styled_df = filtered_df.style.apply(highlight_rows, axis=1)
+
+    # Display the styled DataFrame
+    st.dataframe(styled_df)
+
