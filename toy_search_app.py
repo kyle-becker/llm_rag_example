@@ -147,8 +147,8 @@ if st.session_state.question_clicked:
     for result in re.split("(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s", results):
         st.write(f"{result}")
     
-    st.write("/n Here is the metadata associated with the results for inspection")
-    st.write(f"/n {metadata}")
+    st.write("Here is the metadata associated with the results for inspection")
+    st.write(f"{metadata}")
 
 
 filtered_input = st.text_input(label="Filter the dataframe product description to see how well the llm did ?", 
